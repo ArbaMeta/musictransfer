@@ -13,6 +13,8 @@ This should help to transfer music from spotify to google music.
     - `Quit` or `quit` - stops the sript making no changes to your Google Music
 - Remember to change the `spotify.txt` next time
 
+Video tutorial available on [YouTube](https://www.youtube.com/watch?v=C9yPQFTVLo0&feature=youtu.be)
+
 This script is not perfect, as sometimes not songs are added for reason unkown to me.
 
 Hope this would help someone.
