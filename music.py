@@ -33,7 +33,9 @@ class Music:
                 trackId = line[31:].rstrip()
                 tracks.append(trackId)
 
-        print("Found", len(tracks), "songs")
+        self.count = len(tracks)
+
+        print("Found", self.count, "songs")
         
         self.getInfo(list(self.chunks(tracks, 30)))
 
@@ -51,7 +53,7 @@ class Music:
             data = json.loads(resp.text)
 
             for track in data["tracks"]:
-                song = track["name"] + " " + track["artists"][0]["name"] + " " + track["album"]["name"]
+                song = track["name"] + " " + track["artists"][0]["name"]
                 
                 songs.append(song)
 
@@ -82,10 +84,15 @@ class Music:
         trackIds = []
 
         for song in tqdm(songs, desc="Searching Google Music"):
-            result = self.api.search(song)
+            try:
+                result = self.api.search(song)
+            except Exception as e:
+                continue
 
             if result["song_hits"]:
                 trackIds.append(result["song_hits"][0]["track"]["storeId"])
+
+        print("Found", len(trackIds), "out of", self.count)
 
         self.main(trackIds)
 
@@ -93,10 +100,10 @@ class Music:
 
         while self.isRunning:
             print('==============')
-            command = input("Add, Album Name or Quit?\n>>> ")
+            command = input("Add, Playlist Name or Quit?\n>>> ")
             print('==============')
 
-            if command == "Add":
+            if command == "Add" or command == "add":
                 self.addMusic(songs)
             elif command == "Quit" or command == "quit":
                 self.isRunning = False
@@ -110,5 +117,12 @@ class Music:
         self.api.add_store_tracks(songs)
 
     def addToPlaylist(self, songs, name):
-        playlist = self.api.create_playlist(name)
+        user_playlists = self.api.get_all_playlists()
+        temp = list(filter(lambda d: d['name'] in name, user_playlists))
+
+        if temp:
+            playlist = temp[0]["id"]
+        else:
+            playlist = self.api.create_playlist(name)
+        
         data = self.api.add_songs_to_playlist(playlist, songs)
